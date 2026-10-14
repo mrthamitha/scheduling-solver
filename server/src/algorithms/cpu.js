@@ -231,6 +231,11 @@ export function runCpu(type, processes, options = {}) {
   else if (type === 'priority-np') out = nonPreemptive(work, (p) => -p.pr);
   else if (type === 'srtf') out = preemptive(work, (p) => -p.remaining);
   else if (type === 'priority-p') out = preemptive(work, (p) => -p.pr);
+  else if (type === 'priority-p') out = preemptive(work, (p) => -p.pr);
+  // 🆕 HRRN — score එකට minus ඕන නෑ! ලොකු ratio එකම හොඳ.
+  // කල් ඉන්න එකාගේ ratio එක ටික ටික උස්සන නිසා starve වෙන්නේ නෑ (aging auto).
+  else if (type === 'hrrn') out = nonPreemptive(work, (p, t) => (t - p.at + p.bt) / p.bt);
+  else if (type === 'rr') out = roundRobin(work, quantum >= 1 ? quantum : 2);
   else if (type === 'rr') out = roundRobin(work, quantum >= 1 ? quantum : 2);
   else throw new Error(`"${type}" is not implemented yet`);
 

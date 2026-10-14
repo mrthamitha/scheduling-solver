@@ -45,3 +45,22 @@ show('regression SRTF (expect 6.5)', runCpu('srtf', P([
 show('regression RR q=2 (expect 5.33)', runCpu('rr', P([
   ['P1', 0, 5], ['P2', 0, 4], ['P3', 0, 2],
 ]), { quantum: 2 }));
+/* ── HRRN ── */
+show('HRRN textbook (at 0,1,2,3 | bt 5,3,8,6)', runCpu('hrrn', [
+  { pid: 'P1', at: 0, bt: 5 }, { pid: 'P2', at: 1, bt: 3 },
+  { pid: 'P3', at: 2, bt: 8 }, { pid: 'P4', at: 3, bt: 6 },
+]));
+
+// මේකයි HRRN එකේ ලක්ෂණය — කල් ඉන්න එකා දිනනවා (SJF නම් P3 තෝරනවා!)
+show('HRRN — long waiter wins (at 0,1,2 | bt 2,6,3)', runCpu('hrrn', [
+  { pid: 'P1', at: 0, bt: 2 }, { pid: 'P2', at: 1, bt: 6 }, { pid: 'P3', at: 2, bt: 3 },
+]));
+
+show('HRRN — 5 processes (at 0,1,2,3,4 | bt 10,4,2,1,7)', runCpu('hrrn', [
+  { pid: 'P1', at: 0, bt: 10 }, { pid: 'P2', at: 1, bt: 4 }, { pid: 'P3', at: 2, bt: 2 },
+  { pid: 'P4', at: 3, bt: 1 }, { pid: 'P5', at: 4, bt: 7 },
+]));
+
+show('HRRN — idle gap (at 5,6 | bt 3,4)', runCpu('hrrn', [
+  { pid: 'P1', at: 5, bt: 3 }, { pid: 'P2', at: 6, bt: 4 },
+]));
