@@ -1,4 +1,12 @@
 // algorithms/cpu.js — app එකේ "brain" එක
+//
+// 🎓 ලොකු පාඩම: FCFS හැරුණු කොට අනිත් හැම algorithm එකක්ම engine දෙකෙන් එකක්.
+//    වෙනස තියෙන්නේ "කවුද දිනන්නේ?" කියන score function එකේ විතරයි:
+//
+//      nonPreemptiveEngine:  SJF (score = -bt) · Priority-NP (score = -pr) · (HRRN — ඊළඟට)
+//      preemptiveEngine:     SRTF (score = -remaining) · Priority-P (score = -pr)
+//
+//    score වැඩි එකා දිනනවා. ඒ නිසා "කුඩා අගය හොඳ" නම් minus (-) එකක් දාන්න ඕන.
 
 const round = (v) => Math.round(v * 100) / 100;
 
@@ -36,8 +44,9 @@ function fcfs(work) {
   return { gantt };
 }
 
-/* ── 3) SJF ──────────────────────────────────────────────── */
-function sjf(work) {
+/* ── 3) Non-preemptive engine 🆕 (SJF + Priority-NP හවුලේ) ── */
+// හැම පියවරකදීම: ready queue එකේ ඉහළම score එක තියෙන එකා තෝරලා, ඉවර වෙනකම් run කරනවා.
+function nonPreemptive(work, score) {
   const gantt = [];
   let t = 0;
   let done = 0;
@@ -52,7 +61,8 @@ function sjf(work) {
       continue;
     }
 
-    ready.sort((a, b) => a.bt - b.bt || a.at - b.at || a.i - b.i);
+    // score වැඩි එකා මුලට. Tie නම්: කලින් ආපු එක → ඊටත් tie නම් පළවෙනි එක.
+    ready.sort((a, b) => score(b, t) - score(a, t) || a.at - b.at || a.i - b.i);
     const p = ready[0];
 
     p.start = t;
@@ -65,8 +75,9 @@ function sjf(work) {
   return { gantt };
 }
 
-/* ── 4) SRTF ─────────────────────────────────────────────── */
-function srtf(work) {
+/* ── 4) Preemptive engine 🆕 (SRTF + Priority-P හවුලේ) ────── */
+// හැම event එකකදීම (arrival එකක් හෝ ඉවරවීමක්) ආයෙත් තෝරනවා → preemption automatic.
+function preemptive(work, score) {
   const gantt = [];
   let t = 0;
   let done = 0;
@@ -78,24 +89,26 @@ function srtf(work) {
   };
 
   while (done < work.length) {
-    const ready = work.filter((p) => !p.finished && p.at <= t);
+    const unfinished = work.filter((p) => !p.finished);
+    const ready = unfinished.filter((p) => p.at <= t);
 
     if (ready.length === 0) {
-      const nextArrival = Math.min(...work.filter((p) => !p.finished).map((p) => p.at));
+      const nextArrival = Math.min(...unfinished.map((p) => p.at));
       push(null, t, nextArrival, true);
       t = nextArrival;
       continue;
     }
 
-    ready.sort((a, b) => a.remaining - b.remaining || a.at - b.at || a.i - b.i);
+    ready.sort((a, b) => score(b, t) - score(a, t) || a.at - b.at || a.i - b.i);
     const p = ready[0];
 
     if (!p.started) {
       p.started = true;
-      p.start = t;
+      p.start = t;              // response time — පළවෙනි වතාව විතරයි
     }
 
-    const future = work.filter((q) => !q.finished && q.at > t).map((q) => q.at);
+    // ඊළඟ event එක එනකම් විතරයි run කරන්න පුළුවන්
+    const future = unfinished.filter((q) => q.at > t).map((q) => q.at);
     const nextArrival = future.length ? Math.min(...future) : Infinity;
     let run = Math.min(p.remaining, nextArrival - t);
     if (!Number.isFinite(run) || run <= 0) run = p.remaining;
@@ -113,10 +126,7 @@ function srtf(work) {
   return { gantt };
 }
 
-/* ── 5) Round Robin 🆕 ───────────────────────────────────── */
-// හැම process එකකටත් උපරිම quantum එකක් විතරයි. ඉවර නොවුනොත් ආපහු පේළියේ අන්තිමට.
-// ⚠️ එක quantum block එකක් = එක Gantt කෑල්ලක් (ඈඳන්නේ නෑ!) — RR එකේ ලස්සන
-//    "□ □ □" pattern එක පේන්නේ ඒ නිසා.
+/* ── 5) Round Robin ──────────────────────────────────────── */
 function roundRobin(work, quantum) {
   const gantt = [];
   const queue = [];
@@ -127,10 +137,9 @@ function roundRobin(work, quantum) {
   let nextToArrive = 0;
 
   while (done < work.length) {
-    // ① පේළිය හිස් නම් — ඊළඟ arrival එක එනකම් idle, ඊට පස්සේ පේළිය පුරවනවා
     if (queue.length === 0) {
       const upcoming = sorted[nextToArrive];
-      if (!upcoming) break;                     // හැමෝම ඉවරයි
+      if (!upcoming) break;
       if (upcoming.at > t) {
         gantt.push({ start: t, end: upcoming.at, pid: null, idle: true });
         t = upcoming.at;
@@ -141,28 +150,24 @@ function roundRobin(work, quantum) {
       }
     }
 
-    // ② පේළියේ පළවෙනි එක ගන්නවා
     const p = queue.shift();
 
     if (!p.started) {
       p.started = true;
-      p.start = t;                              // response time — පළවෙනි වතාව විතරයි
+      p.start = t;
     }
 
-    // ③ quantum එක දක්වා run කරනවා
     const run = Math.min(quantum, p.remaining);
     const from = t;
     p.remaining -= run;
     t += run;
     gantt.push({ start: from, end: t, pid: p.pid, idle: false });
 
-    // ④ ඒ කාලය ඇතුළත ආපු අලුත් අය පේළියට ⚠️ (මේක අමතක කරා නම් waiting වැරදි!)
     while (nextToArrive < sorted.length && sorted[nextToArrive].at <= t) {
       queue.push(sorted[nextToArrive]);
       nextToArrive += 1;
     }
 
-    // ⑤ ඉවර නම් completion · නැත්නම් ආපහු පේළියේ අන්තිමට
     if (p.remaining === 0) {
       p.finished = true;
       done += 1;
@@ -171,7 +176,6 @@ function roundRobin(work, quantum) {
       queue.push(p);
     }
   }
-
   return { gantt };
 }
 
@@ -217,15 +221,16 @@ function finalise(gantt, work) {
 }
 
 /* ── 7) පිවිසුම් දොර ─────────────────────────────────────── */
-// options: { quantum } — Round Robin එකට විතරයි ඕන
 export function runCpu(type, processes, options = {}) {
   const work = makeWork(processes);
   const quantum = Number(options.quantum ?? 2);
 
   let out;
   if (type === 'fcfs') out = fcfs(work);
-  else if (type === 'sjf') out = sjf(work);
-  else if (type === 'srtf') out = srtf(work);
+  else if (type === 'sjf') out = nonPreemptive(work, (p) => -p.bt);
+  else if (type === 'priority-np') out = nonPreemptive(work, (p) => -p.pr);
+  else if (type === 'srtf') out = preemptive(work, (p) => -p.remaining);
+  else if (type === 'priority-p') out = preemptive(work, (p) => -p.pr);
   else if (type === 'rr') out = roundRobin(work, quantum >= 1 ? quantum : 2);
   else throw new Error(`"${type}" is not implemented yet`);
 
