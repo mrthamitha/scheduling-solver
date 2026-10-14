@@ -9,7 +9,44 @@
 //    score වැඩි එකා දිනනවා. ඒ නිසා "කුඩා අගය හොඳ" නම් minus (-) එකක් දාන්න ඕන.
 
 const round = (v) => Math.round(v * 100) / 100;
-
+/* ── 0) Algorithm list (frontend dropdown එකට + validation වලට) ── */
+export const CPU_ALGOS = [
+  {
+    id: 'fcfs', name: 'First Come First Serve (FCFS)', short: 'FCFS',
+    needsPriority: false, needsQuantum: false,
+    description: 'Processes are served in arrival order, each running to completion. Simple and fair, but one long job can hold up everybody behind it.',
+  },
+  {
+    id: 'sjf', name: 'Shortest Job First — non-preemptive (SJF)', short: 'SJF',
+    needsPriority: false, needsQuantum: false,
+    description: 'The available process with the smallest burst time runs to completion. Gives the lowest average waiting time, but long jobs can starve.',
+  },
+  {
+    id: 'srtf', name: 'Shortest Remaining Time First — preemptive (SRTF)', short: 'SRTF',
+    needsPriority: false, needsQuantum: false,
+    description: 'Preemptive SJF: a newly arrived process takes the CPU whenever its remaining time is smaller than the running process.',
+  },
+  {
+    id: 'rr', name: 'Round Robin (RR)', short: 'RR',
+    needsPriority: false, needsQuantum: true,
+    description: 'Every process takes turns in a circular queue and may run for at most one time quantum. The standard choice for time-sharing systems.',
+  },
+  {
+    id: 'priority-p', name: 'Priority — preemptive', short: 'Priority-P',
+    needsPriority: true, needsQuantum: false,
+    description: 'The highest-priority process (smallest number) runs and preempts a running lower-priority process as soon as it arrives.',
+  },
+  {
+    id: 'priority-np', name: 'Priority — non-preemptive', short: 'Priority-NP',
+    needsPriority: true, needsQuantum: false,
+    description: 'The highest-priority process that is present runs to completion. A newly arrived process must wait, even if it has a higher priority.',
+  },
+  {
+    id: 'hrrn', name: 'Highest Response Ratio Next (HRRN)', short: 'HRRN',
+    needsPriority: false, needsQuantum: false,
+    description: 'Non-preemptive: the process with the highest response ratio (waiting + burst) / burst wins. Long waiters slowly gain priority, so nobody starves.',
+  },
+];
 /* ── 1) Input copy ───────────────────────────────────────── */
 function makeWork(processes) {
   return processes.map((p, i) => ({
