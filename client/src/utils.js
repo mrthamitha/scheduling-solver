@@ -7,3 +7,21 @@ export function parseNumbers(text) {
     return n;
   });
 }
+
+/** Process එකකට ලස්සන color එකක් — හැම එකකටම වෙනස්. */
+export const PALETTE = [
+  '#4c8dff', '#2dd4bf', '#f59e0b', '#a78bfa', '#f472b6',
+  '#34d399', '#60a5fa', '#fb923c', '#38bdf8', '#c084fc',
+];
+
+export function buildColorMap(pids) {
+  const map = {};
+  pids.forEach((pid, i) => {
+    map[pid] = PALETTE[i % PALETTE.length];
+  });
+  return map;
+}
+
+/** 5.25 -> "5.25" · 5 -> "5" */
+export const formatNumber = (value) =>
+  Number.isInteger(value) ? String(value) : value.toFixed(2);

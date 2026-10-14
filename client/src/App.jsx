@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getAlgorithms, solve } from './api.js';
 import { parseNumbers } from './utils.js';
+import Results from './components/Results.jsx';
 
 export default function App() {
   const [mode, setMode] = useState('cpu');                 // 'cpu' | 'disk'
@@ -155,7 +156,7 @@ export default function App() {
         {error && <p className="error">⚠️ {error}</p>}
       </form>
 
-      {result && <pre className="output">{JSON.stringify(result, null, 2)}</pre>}
+            <Results result={result} />
     </div>
   );
 }
