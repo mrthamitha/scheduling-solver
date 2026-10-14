@@ -1,54 +1,96 @@
 /**
- * Disk head movement chart එක — pure SVG (library එකක් නැතුව!).
- * x = හැම පියවරක්ම · y = cylinder අංකය · රතු කැබැල්ල = jump එක
+ * Disk head movement chart — 90° කරපු version (textbook style).
+ *
+ *   x = cylinder  (0 → maxCylinder, වමේ ඉඳන් දකුණට)
+ *   y = service order (උඩ ඉඳන් පහළට — හැම පියවරක්ම එක පේළියක්)
+ *
+ * රතු dashed කැබැල්ල = jump එක (C-SCAN / C-LOOK වල return jump).
+ * rowH එක වෙනස් කරලා උස පාලනය කරන්න පුළුවන් (පැතලි/උස).
  */
 export default function HeadMovementChart({ steps, head, maxCylinder }) {
   if (!steps?.length) return null;
 
   const positions = [head, ...steps.map((s) => s.to)];
-  const W = 660;
-  const H = 280;
-  const padX = 34;
-  const padY = 26;
+  const rows = positions.length;
 
-  const x = (i) => padX + (i / Math.max(1, positions.length - 1)) * (W - padX * 2);
-  const y = (v) => H - padY - (v / maxCylinder) * (H - padY * 2);
+  const W = 780;
+  const padL = 34;   // වම් පැත්තේ step අංක වලට
+  const padR = 30;
+  const padT = 36;   // උඩ තියෙන cylinder axis එකට
+  const padB = 28;
+  const rowH = 30;   // ← පැතලි කරන්න මේක අඩු කරන්න / උස කරන්න වැඩි කරන්න
+  const H = padT + (rows - 1) * rowH + padB;
 
-  const gridValues = [0, Math.round(maxCylinder / 2), maxCylinder];
+  const x = (v) => padL + (v / maxCylinder) * (W - padL - padR);
+  const y = (i) => padT + i * rowH;
+
+  // cylinder axis ticks: 0 · ¼ · ½ · ¾ · max
+  const step = maxCylinder / 4;
+  const ticks = [0, 1, 2, 3, 4].map((i) => (i === 4 ? maxCylinder : Math.round(i * step)));
 
   return (
-    <svg className="headchart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Disk head movement">
-      {gridValues.map((v) => (
-        <g key={v}>
-          <line x1={padX} x2={W - padX} y1={y(v)} y2={y(v)} stroke="#26324d" strokeDasharray="3 5" />
-          <text x={6} y={y(v) + 4} fill="#93a1bd" fontSize="11">{v}</text>
+    <svg
+      className="headchart"
+      viewBox={`0 0 ${W} ${H}`}
+      role="img"
+      aria-label="Disk head movement"
+      style={{ width: '100%' }}
+    >
+      {/* ── උඩ cylinder axis එක ── */}
+      {ticks.map((v) => (
+        <g key={`t${v}`}>
+          <line x1={x(v)} x2={x(v)} y1={padT - 14} y2={padT - 8} stroke="#4a5a7d" />
+          <text x={x(v)} y={padT - 20} fill="#93a1bd" fontSize="11" textAnchor="middle">{v}</text>
         </g>
       ))}
+      <text x={W - padR} y={padT - 20} fill="#93a1bd" fontSize="11" textAnchor="end">cylinder</text>
 
+      {/* ── හැම පේළියකටම ලා නිල් gridline එකක් ── */}
+      {positions.map((v, i) => (
+        <line
+          key={`g${i}`}
+          x1={padL} x2={W - padR} y1={y(i)} y2={y(i)}
+          stroke={i === 0 ? '#33436b' : '#1c2740'}
+          strokeWidth={i === 0 ? 1 : 0.7}
+        />
+      ))}
+
+      {/* ── වම් පැත්තේ step අංක (head / 1 / 2 …) ── */}
+      {positions.map((v, i) => (
+        <text key={`s${i}`} x={padL - 8} y={y(i) + 4} fill="#93a1bd" fontSize="10" textAnchor="end">
+          {i === 0 ? 'head' : i}
+        </text>
+      ))}
+
+      {/* ── ගමන් කරන ඉරි (segments) ── */}
       {steps.map((s, i) => (
         <line
           key={`l${i}`}
-          x1={x(i)}
-          y1={y(positions[i])}
-          x2={x(i + 1)}
-          y2={y(s.to)}
+          x1={x(positions[i])} y1={y(i)}
+          x2={x(s.to)} y2={y(i + 1)}
           stroke={s.jump ? '#ff6b6b' : '#4c8dff'}
           strokeWidth={s.jump ? 2 : 2.5}
           strokeDasharray={s.jump ? '6 4' : undefined}
         />
       ))}
 
+      {/* ── නවතින තැන් (points) + cylinder අංක ── */}
       {positions.map((v, i) => (
         <g key={`p${i}`}>
-          <circle cx={x(i)} cy={y(v)} r={4} fill={i === 0 ? '#e6ecf7' : '#131c31'} stroke="#4c8dff" strokeWidth="2" />
+          <circle
+            cx={x(v)} cy={y(i)} r={i === 0 ? 5 : 4}
+            fill={i === 0 ? '#e6ecf7' : '#131c31'}
+            stroke={i === 0 ? '#e6ecf7' : '#4c8dff'}
+            strokeWidth="2"
+          />
           {i > 0 && (
-            <text x={x(i)} y={y(v) - 9} fill="#93a1bd" fontSize="10" textAnchor="middle">{v}</text>
+            <text x={x(v) + 8} y={y(i) + 4} fill="#93a1bd" fontSize="10">{v}</text>
           )}
         </g>
       ))}
 
-      <text x={padX} y={H - 6} fill="#93a1bd" fontSize="11">
-        head {head} → first stop: {positions[1]} → ... → {positions[positions.length - 1]}
+      <text x={padL} y={H - 8} fill="#93a1bd" fontSize="11">
+        head {head} · cylinders left to right · service order top to bottom
       </text>
     </svg>
   );
