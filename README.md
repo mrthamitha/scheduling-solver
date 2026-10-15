@@ -15,3 +15,12 @@ tables and step-by-step traces explaining every scheduling decision.
 cd server
 npm install
 npm run dev     # http://localhost:4000/api/health
+## Run locally
+
+Open **two terminals**:
+
+```bash
+# Terminal 1 — API (http://localhost:4000)
+cd server
+npm install
+npm run dev
