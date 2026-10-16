@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { getAlgorithms, solve } from './api.js';
+import { getAlgorithms, getSolution, saveSolution, solve } from './api.js';
+import ShareBar from './components/ShareBar.jsx';
 import { parseNumbers } from './utils.js';
 import Results from './components/Results.jsx';
 
@@ -18,6 +19,8 @@ export default function App() {
   const [direction, setDirection] = useState('right');
 
   const [result, setResult] = useState(null);
+  const [lastInput, setLastInput] = useState(null);  // share කරන්න ඕන input එක
+const [shareId, setShareId] = useState(null);      // save කරාට පස්සේ ලැබෙන id එක
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -70,6 +73,7 @@ export default function App() {
     try {
       const body = mode === 'cpu' ? buildCpuBody() : buildDiskBody();
       setResult(await solve(body));
+      setLastInput(body); // share කරද්දී පාවිච්චි කරන්න
     } catch (err) {
       setError(err.message);
     } finally {
@@ -157,6 +161,7 @@ export default function App() {
       </form>
 
             <Results result={result} />
+            <ShareBar lastInput={lastInput} result={result} />
     </div>
   );
 }

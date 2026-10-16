@@ -22,3 +22,10 @@ export const solve = (body) =>
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
+export const saveSolution = (payload) =>
+  request('/api/solutions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }, // ← headers එක මෙතනම දානවා
+    body: JSON.stringify(payload),
+  });
+  export const getSolution = (id) => request(`/api/solutions/${id}`);

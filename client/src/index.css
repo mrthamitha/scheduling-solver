@@ -90,3 +90,68 @@ button.primary:disabled { opacity: .6; cursor: wait; }
 .jumpbadge { color: var(--danger); font-size: .72rem; margin-left: 6px; }
 .order-line { font-size: .85rem; color: var(--text); margin: 6px 0; }
 .headchart { width: 100%; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; margin-top: 10px; }
+/* ---------- Share bar ---------- */
+.share-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #2a3142;
+}
+.share-label { color: #9aa4b2; font-size: 14px; }
+.share-link {
+  flex: 1;
+  min-width: 220px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #2a3142;
+  background: #0f131c;
+  color: #e6e9ef;
+  font-size: 14px;
+}
+.btn-ghost, .btn-primary {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-ghost { background: transparent; border-color: #3b82f6; color: #93b8f8; }
+.btn-primary { background: #3b82f6; color: #fff; }
+.btn-ghost:disabled { opacity: 0.6; cursor: default; }
+/* ---------- Share bar ---------- */
+.share-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #2a3142;
+}
+.share-label { color: #9aa4b2; font-size: 14px; }
+.share-link {
+  flex: 1;
+  min-width: 220px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #2a3142;
+  background: #0f131c;
+  color: #e6e9ef;
+  font-size: 14px;
+}
+.btn-ghost, .btn-primary {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-ghost { background: transparent; border-color: #3b82f6; color: #93b8f8; }
+.btn-primary { background: #3b82f6; color: #fff; }
+.btn-ghost:disabled { opacity: 0.6; cursor: default; }
+.share-error { color: #ff6b6b; font-size: 14px; }

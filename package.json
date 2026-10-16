@@ -1,8 +1,9 @@
 {
   "name": "scheduling-solver",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=20" },
+  "description": "Learn CPU & disk scheduling with Gantt charts, trace tables and shareable solutions (React + Express)",
   "scripts": {
     "postinstall": "npm --prefix server install && npm --prefix client install --include=dev",
     "build": "npm --prefix client run build",
@@ -10,5 +11,8 @@
     "dev:server": "npm --prefix server run dev",
     "dev:client": "npm --prefix client run dev",
     "test": "npm --prefix server test"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
