@@ -1,6 +1,7 @@
 {
   "name": "scheduling-solver",
   "private": true,
+  "type": "module",
   "engines": { "node": ">=20" },
   "scripts": {
     "postinstall": "npm --prefix server install && npm --prefix client install --include=dev",
